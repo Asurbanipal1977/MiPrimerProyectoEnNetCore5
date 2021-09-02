@@ -1,0 +1,45 @@
+﻿@model MiPrimerProyectoEnNetCore5.Clases.PaginaCLS
+
+@{
+    ViewData["Title"] = "Agregar";
+}
+
+<h1>Agregar nueva página</h1>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Guardar" id="frmEnviar" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Mensaje" class="control-label"></label>
+                <input asp-for="Mensaje" class="form-control" />
+                <span asp-validation-for="Mensaje" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Accion" class="control-label"></label>
+                <input asp-for="Accion" class="form-control" />
+                <span asp-validation-for="Accion" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Controlador" class="control-label"></label>
+                <input asp-for="Controlador" class="form-control" />
+                <span asp-validation-for="Controlador" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="button" value="Guardar" class="btn btn-primary" onclick="Guardar()" />
+                <a asp-action="Index" class="btn btn-danger">Regresar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function Guardar() {
+        AbrirModalGenerica().then((result) => {
+            if (result.isConfirmed) {
+                $("#frmEnviar").submit();
+            }
+        })
+    }
+</script>
+

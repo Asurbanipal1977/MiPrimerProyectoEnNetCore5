@@ -1,0 +1,229 @@
+﻿@model IEnumerable<MiPrimerProyectoEnNetCore5.Clases.TipoUsuarioCLS>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<form asp-controller="TipoUsuario" asp-action="Index" id="formTipoUsuario">
+    <input type="submit" value="Enviar" class="btn btn-primary" />
+    <input type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" onclick="Agregar()" value="Agregar">
+    <table class="table" id="myTable">
+        <thead class="thead-dark">
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.IdUsuario)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Nombre)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Descripcion)
+                </th>
+                <th>
+                    Operaciones
+                </th>
+            </tr>
+            <tr>
+                <th>
+                    @if (ViewBag.IdTipoUsuario == 0)
+                    {
+                        <input type="number" name="IdUsuario" class="form-check form-control" value="" />
+                    }
+                    else
+                    {
+                        <input type="number" name="IdUsuario" class="form-check form-control" value="@ViewBag.IdTipoUsuario" />
+                    }
+
+                </th>
+                <th>
+                    <input type="text" name="Nombre" class="form-check form-control" value="@ViewBag.Nombre" />
+                </th>
+                <th>
+                    <input type="text" name="Descripcion" class="form-check form-control" value="@ViewBag.Descripcion" />
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.IdUsuario)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Nombre)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Descripcion)
+                    </td>
+                    <td>
+                        <i class="fas fa-trash btn btn-danger" onclick="Eliminar(@item.IdUsuario)" style="cursor:pointer"></i>
+                        <i class="fas fa-edit btn btn-primary" onclick="Editar('TipoUsuario',@item.IdUsuario)" data-toggle="modal" data-target="#exampleModal" style="cursor:pointer"></i>
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+</form>
+
+<form asp-action="Eliminar" asp-controller="TipoUsuario" method="post" id="formEliminar">
+    <input type="hidden" id="txtIdUsuario" name="idTipoUsuario" />
+</form>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="lblModalTitle">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Id Usuario</label>
+                    <input type="text" id="txtIdTipoUsuario" readonly class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Nombre Usuario</label>
+                    <input type="text" id="txtNombreUsuario" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Descripción Usuario</label>
+                    <input type="text" id="txtDescripcionUsuario" class="form-control" />
+                </div>
+                <div id="divPaginas">
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="Guardar('TipoUsuario')">Guardar</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" id="btnCancelar">Cancelar</button>
+            </div>
+            <div id="divError">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function Eliminar(idUsuario) {
+        $('#txtIdUsuario').val(idUsuario);
+        AbrirModalGenerica().then((result) => {
+            if (result.isConfirmed) {
+                $("#formEliminar").submit();
+                Correcto("Se eliminó el tipo de usuario correctamente");
+            }
+        });
+    }
+
+    function Agregar() {
+        $('#divError').html("");
+        $('#lblModalTitle').html('Alta de Tipo Usuario');
+        $('#divPaginas').html();
+        $(".form-control").each(function () {
+            $(this).val("");
+        });
+    }
+
+    function Editar(controller, id) {
+        $('#divError').html("");
+        $('#lblModalTitle').html('Editar Tipo Usuario');
+        ListarPagina();
+        $.get(controller + '/Editar/' + id,
+            function (data) {
+                $('#txtIdTipoUsuario').val(data.idUsuario);
+                $('#txtNombreUsuario').val(data.nombre);
+                $('#txtDescripcionUsuario').val(data.descripcion);
+                $.each(data.listaPaginas, function (i, item) {
+                    $('#chkPaginas' + item.idPagina).prop("checked", true); 
+                    $('#cboVistas' + item.idPagina).val(item.idVista);
+                });
+            });
+    }
+
+    function Guardar(controller) {
+
+        var selectedPaginas = [];
+        var selectedVistas = [];
+        $('input[name="chkPaginas"]').each(function (index) {
+            if (this.checked) {
+                selectedPaginas.push($(this).val());
+                selectedVistas.push($('#cboVistas' + $(this).val()).val());
+            }
+        });   
+        $('input[name="cboVistas"]').each(function () {
+            if (this.checked) {
+                selectedVistas.push($(this).val());
+            }
+        });   
+
+        $.post(controller + '/GuardarDatos',
+            {
+                IdUsuario: $('#txtIdTipoUsuario').val() == "" ? 0 : $('#txtIdTipoUsuario').val(),
+                Nombre: $('#txtNombreUsuario').val(),
+                Descripcion: $('#txtDescripcionUsuario').val(),
+                aPaginas: selectedPaginas,
+                aVistas: selectedVistas
+            },
+            function (data) {
+                $('#divError').html("");
+                if (data == "OK") {
+                    Correcto("Se guardó el tipo de usuario correctamente");
+                    setTimeout(function () {
+                        $('#btnCancelar').click();
+                        $('#formTipoUsuario').submit();
+                    }, 1000);
+                }
+                else {
+                    Incorrecto("Se produjo un error");
+                    $('#divError').html(data);
+                }
+            });
+    }
+
+
+    function ListarPagina() {
+        $.post('Pagina/Listar',
+            {
+                Mensaje: ""
+            },
+            function (data) {
+                var contenido = "";
+                contenido += "<table class='table'>";
+                contenido += " <thead>";
+                contenido += "<tr>";
+                contenido += "<td></td>";
+                contenido += "<td>Nombre de página</td>";
+                contenido += "<td>Tipo vista</td>";
+                contenido += "</tr>";
+                
+                
+                contenido += "<tbody>";
+                $.each(data, function (idx, opt) {
+                    contenido += "<tr>";
+
+                    contenido += "<td><input type='checkbox' name='chkPaginas' class='checkbox' id='chkPaginas" + opt['idPagina'] + "' value='" + opt['idPagina'] + "' /></td>";
+                    contenido += "<td>" + opt['mensaje']+"</td>";
+                    contenido += "<td>";
+                    contenido += "<select name='cboVistas' id='cboVistas" + opt['idPagina'] + "'>";
+                    contenido += "<option value='0'>--Seleccione</option>";
+                    contenido += "<option value='1'>Vista Total</option>";
+                    contenido += "<option value='2'>Vista Parcial</option>";
+                    contenido += "</select>";
+                    contenido += "</td>";
+                    contenido += "</tr>";
+                });
+                contenido += "</tbody>";
+                contenido += "</table>";  
+                $('#divPaginas').html(contenido);
+            });
+    }
+
+    $(document).ready(function () {
+        $('#myTable').DataTable();
+    });
+</script>

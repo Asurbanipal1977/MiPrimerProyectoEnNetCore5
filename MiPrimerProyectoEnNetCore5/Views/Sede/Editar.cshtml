@@ -1,0 +1,46 @@
+﻿@model MiPrimerProyectoEnNetCore5.Clases.SedeCLS
+
+@{
+    ViewData["Title"] = "Editar";
+}
+
+<h1>Editar</h1>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Guardar" method="post" id="frmEnviar">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="idSede" class="control-label"></label>
+                <input asp-for="idSede" class="form-control" readonly />
+                <span asp-validation-for="idSede" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Nombre" class="control-label"></label>
+                <input asp-for="Nombre" class="form-control" />
+                <span asp-validation-for="Nombre" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Direccion" class="control-label"></label>
+                <input asp-for="Direccion" class="form-control" />
+                <span asp-validation-for="Direccion" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="button" value="Guardar" class="btn btn-primary" onclick="Guardar()" />
+                <a asp-action="Index" class="btn btn-danger">Regresar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    function Guardar() {
+        AbrirModalGenerica().then((result) => {
+            if (result.isConfirmed) {
+                $("#frmEnviar").submit();
+            }
+        })
+    }
+</script>
+

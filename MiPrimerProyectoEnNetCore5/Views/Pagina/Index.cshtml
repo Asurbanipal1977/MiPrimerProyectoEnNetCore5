@@ -1,0 +1,129 @@
+﻿@model IEnumerable<MiPrimerProyectoEnNetCore5.Clases.PaginaCLS>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<a class="btn btn-secondary" asp-action="Agregar" asp-controller="Pagina">Agregar</a>
+<input type="button" class="btn btn-primary" value="Exportar Excel" onclick="Exportar('Excel')" />
+<input type="button" class="btn btn-primary" value="Exportar Word" onclick="Exportar('Word')" />
+<input type="button" class="btn btn-primary" value="Exportar Pdf" onclick="Exportar('Pdf','Pagina')" />
+<input type="button" class="btn btn-primary" value="Imprimir" onclick="Imprimir()" />
+
+<form class="mb-2" style="display:grid;grid-template-columns:1fr 2fr 1fr 1fr" id="formPagina">
+    <label>Introduzca nombre página:</label>
+    <input type="text" id="Mensaje" class="form form-control" name="Mensaje" value="@ViewBag.Mensaje" />
+    <input type="button" class="btn btn-info" value="Buscar" onclick="Buscar('Pagina')" />
+    <input type="button" class="btn btn-danger" value="Limpiar" onclick="Limpiar()" />
+</form>
+
+<form asp-action="exportar" asp-controller="Pagina" method="post" id="formExcel">
+    <table class="table" id="myTable">
+        <thead class="thead-dark">
+            <tr id="tcheck">
+                @*<th width="5%">
+                    <input type="checkbox" name="nombrePropiedades" checked value="IdPagina" />
+
+                 </th>*@
+                <th width="30%"><input type="checkbox" name="nombrePropiedades" checked value="Mensaje" />
+                    <input type="hidden" name="tipoReporte" id="tipoReporte" />
+                </th>
+                <th width="25%"><input type="checkbox" name="nombrePropiedades" checked value="Accion" /></th>
+                <th width="25%"><input type="checkbox" name="nombrePropiedades" checked value="Controlador" /></th>
+                
+                <th width="15%"></th>
+            </tr>
+            <tr>
+                @*<th>
+                    @Html.DisplayNameFor(model => model.IdPagina)
+                </th>*@
+                <th>
+                    @Html.DisplayNameFor(model => model.Mensaje)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Accion)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Controlador)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="cuerpoTabla">
+            @*@foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.IdPagina)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Mensaje)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Accion)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Controlador)
+                    </td>
+                    <td>
+                        <i class="fas fa-trash btn btn-danger" onclick="Eliminar(@item.IdPagina)" style="cursor:pointer"></i>
+                        @Html.ActionLink("", "Editar", "Pagina", new { id = item.IdPagina }, new { @class = "fas fa-edit btn btn-primary", @style = "cursor:pointer" })
+                    </td>
+                </tr>
+            }*@
+        </tbody>
+    </table>
+</form>
+
+<form method="post" id="formEliminar">
+    <input type="hidden" id="txtIdPagina" name="idPagina" />
+</form>
+
+<script>
+    var campos = ['mensaje', 'accion','controlador'];
+    var campoID = 'idPagina'; 
+
+    function Limpiar() {
+        $('#Mensaje').val("");
+        Listar('Pagina');
+    }
+
+    function Eliminar(controller,idPagina) {
+        $('#txtIdPagina').val(idPagina);
+        AbrirModalGenerica().then((result) => {
+            if (result.isConfirmed) {
+                //$("#formEliminar").submit();
+                $.get(controller + '/Eliminar?idPagina=' + idPagina, function (respuesta) {
+                    if (respuesta == 1) {
+                        Listar(controller);
+                        Correcto("Se eliminó correctamente la página");
+                    }
+                    else {
+                        Incorrecto("Error al eliminar");
+                    }
+                });
+            }
+        });
+    }
+
+    function Buscar(controller) {
+
+        if ($('#Mensaje').val() == "")
+            Listar(controller);
+        else {
+            var table = $('#myTable').DataTable();
+            table.destroy();
+            $.post(controller + '/Listar',
+                {
+                    Mensaje: $('#Mensaje').val()
+                }, function (data) {
+                    Pintar(data, controller, 'myTable', campos, campoID);
+                });
+        }
+    }
+
+    $(document).ready(function () {
+        Listar('Pagina');
+    });
+
+</script>

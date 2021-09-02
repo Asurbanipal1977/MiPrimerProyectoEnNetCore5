@@ -1,0 +1,85 @@
+﻿@model MiPrimerProyectoEnNetCore5.Clases.PersonaCLS
+
+@{
+    ViewData["Title"] = "Agregar";
+}
+
+<h1>Agregar Persona</h1>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Guardar" method="post" id="frmEnviar">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            @if (Model != null && !string.IsNullOrWhiteSpace(Model.MensajeErrorNombre))
+            {
+                <span class="text-danger">@Model.MensajeErrorNombre</span>
+            }
+            <div class="form-group">
+                <label asp-for="IdPersona" class="control-label"></label>
+                <input asp-for="IdPersona" class="form-control" readonly />
+                <span asp-validation-for="IdPersona" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Nombre" class="control-label"></label>
+                <input asp-for="Nombre" class="form-control" />
+                <span asp-validation-for="Nombre" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Appaterno" class="control-label"></label>
+                <input asp-for="Appaterno" class="form-control" />
+                <span asp-validation-for="Appaterno" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Apmaterno" class="control-label"></label>
+                <input asp-for="Apmaterno" class="form-control" />
+                <span asp-validation-for="Apmaterno" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Fechanacimiento" class="control-label"></label>
+                <input asp-for="Fechanacimiento" class="form-control"  />
+                <span asp-validation-for="Fechanacimiento" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Telefonofijo" class="control-label"></label>
+                <input asp-for="Telefonofijo" class="form-control" />
+                <span asp-validation-for="Telefonofijo" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Telefonocelular" class="control-label"></label>
+                <input asp-for="Telefonocelular" class="form-control" />
+                <span asp-validation-for="Telefonocelular" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+                @if (Model != null && !string.IsNullOrWhiteSpace(Model.MensajeErrorEmail))
+                {
+                    <span class="text-danger">@Model.MensajeErrorEmail</span>
+                }
+            </div>
+            <div class="form-group">
+                <label asp-for="IdSexo" class="control-label"></label>
+                <select asp-for="IdSexo" class="form-control" asp-items="@ViewBag.listSexo"></select>
+                <span asp-validation-for="IdSexo" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="button" value="Guardar" class="btn btn-primary" onclick="Guardar()" />
+                <a class="btn btn-danger" asp-action="Index">Regresar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    function Guardar() {
+        AbrirModalGenerica().then((result) => {
+            if (result.isConfirmed) {
+                $("#frmEnviar").submit();
+            }
+        })
+    }
+</script>
+

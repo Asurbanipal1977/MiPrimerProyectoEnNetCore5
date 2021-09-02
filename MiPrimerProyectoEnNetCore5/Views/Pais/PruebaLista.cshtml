@@ -1,0 +1,27 @@
+﻿@using MiPrimerProyectoEnNetCore5.Clases;
+@model IEnumerable<Instructor>
+@{
+    ViewData["Title"] = "PruebaLista";
+}
+
+<h1>PruebaLista</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Apellido 1</th>
+            <th>Apellido 2</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Instructor instructor in Model)
+        {
+            <tr>
+                <td>@instructor.Nombre</td>
+                <td>@instructor.ApellidoPaterno</td>
+                <td>@instructor.ApellidoMaterno</td>
+            </tr>
+        }
+    </tbody>
+</table>

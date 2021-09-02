@@ -1,0 +1,168 @@
+﻿@using MiPrimerProyectoEnNetCore5.Clases;
+
+@model IEnumerable<PaginaTipoUsuarioCLS>
+@{
+    ViewData["Title"] = "Index";
+    List<SelectListItem> listaTipoUsuario = ViewBag.listaTipoUsuario;
+}
+
+<input type="button" class="btn btn-primary" value="Exportar Excel" onclick="Exportar('Excel')" />
+<input type="button" class="btn btn-primary" value="Exportar Word" onclick="Exportar('Word')" />
+<input type="button" class="btn btn-primary" value="Exportar Pdf" onclick="Exportar('Pdf','PaginaTipoUsuario')" />
+<input type="button" class="btn btn-primary" value="Imprimir" onclick="Imprimir()" />
+
+<form class="mb-2" style="display:grid;grid-template-columns:1fr 2fr 1fr 1fr" id="formPersona">
+    <label>Introduzca tipo usuario:</label>
+    @Html.DropDownList("idTipoUsuario", listaTipoUsuario, new { @class = "form form-control" })
+    <input type="button" class="btn btn-primary" value="Buscar" onclick="Buscar('PaginaTipoUsuario')" />
+    <input type="button" class="btn btn-primary" value="Limpiar" onclick="Limpiar()" />
+</form>
+
+<form asp-action="exportar" asp-controller="PaginaTipoUsuario" method="post" id="formExcel">
+    <table class="table" id="myTable">
+        <thead class="thead-dark">
+            <tr id="tcheck">
+                <th>
+                    <input type="checkbox" name="nombrePropiedades" checked value="nombrePagina" />
+                    <input type="hidden" name="tipoReporte" id="tipoReporte" />
+                </th>
+                <th><input type="checkbox" name="nombrePropiedades" checked value="nombreTipoUsuario" /></th>
+                <th>Operaciones</th>
+            </tr>
+            <tr>
+                <th>@Html.DisplayNameFor(p => p.nombrePagina)</th>
+                <th>@Html.DisplayNameFor(p => p.nombreTipoUsuario)</th>
+                <th></th>
+            </tr>
+        <tbody id="cuerpoTabla">
+        </tbody>
+    </table>
+</form>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="lblModalTitle">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Id Tipo Usuario Página</label>
+                    <input type="text" id="txtIdTipoUsuarioPagina" readonly class="form-control" />
+                </div>
+               
+                <div id="divBotones">
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="Guardar('PaginaTipoUsuario')">Guardar</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" id="btnCancelar">Cancelar</button>
+            </div>
+            <div id="divError">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var campos = ['nombrePagina', 'nombreTipoUsuario'];
+    var campoID = 'idPaginaTipoUsuario';
+
+    $(document).ready(function () {
+        Listar('PaginaTipoUsuario', true);
+    });
+
+    function Limpiar() {
+        $('#idTipoUsuario').val("");
+        Listar('PaginaTipoUsuario', true);
+    }
+
+    function Buscar(controller) {
+        var table = $('#myTable').DataTable();
+        table.destroy();
+        $.post(controller + '/Listar',
+            {
+                idTipoUsuario: $('#idTipoUsuario').val()
+            }, function (data) {
+                Pintar(data, controller, 'myTable', campos, campoID, true);
+            });
+    }
+
+    function Editar(controller, id) {
+        $('#divError').html("");
+        $('#lblModalTitle').html('Editar Tipo Usuario Pagina');
+        $('#txtIdTipoUsuarioPagina').val(id);
+        ListarBotones();
+        $.get(controller + '/RecuperarBotones/' + id,
+            function (data) {                
+                $.each(data, function (i, item) {
+                    $('#chkBotones' + item.idBoton).prop("checked", true);
+                });
+            });
+    }
+
+    function ListarBotones() {
+    $.post(' PaginaTipoUsuario/ListarBotones',
+        {
+            Mensaje: ""
+        },
+        function (data) {
+            var contenido = "";
+            contenido += "<table class='table'>";
+            contenido += " <thead>";
+            contenido += "<tr>";
+            contenido += "<td></td>";
+            contenido += "<td>Nombre de página</td>";
+            contenido += "</tr>";
+
+
+            contenido += "<tbody>";
+            $.each(data, function (idx, opt) {
+                contenido += "<tr>";
+
+                contenido += "<td><input type='checkbox' name='chkBotones' class='checkbox' id='chkBotones" + opt['idBoton'] + "' value='" + opt['idBoton'] + "' /></td>";
+                contenido += "<td>" + opt['nombreBoton'] + "</td>";
+
+                contenido += "</tr>";
+            });
+            contenido += "</tbody>";
+            contenido += "</table>";
+            $('#divBotones').html(contenido);
+        });
+    }
+
+
+    function Guardar(controller) {
+
+        var selected = [];
+        $('input[name="chkBotones"]').each(function () {
+            if (this.checked) {
+                selected.push($(this).val());
+            }
+        });
+
+        $.post(controller + '/GuardarDatos',
+            {
+                idPaginaTipoUsuario: $('#txtIdTipoUsuarioPagina').val() == "" ? 0 : $('#txtIdTipoUsuarioPagina').val(),
+                aBotones: selected
+            },
+            function (data) {
+                $('#divError').html("");
+                if (data == "OK") {
+                    Correcto("Se guardó correctamente los botones");
+                    setTimeout(function () {
+                        $('#btnCancelar').click();
+                    }, 1000);
+                }
+                else {
+                    Incorrecto("Se produjo un error");
+                    $('#divError').html(data);
+                }
+            });
+    }
+</script>

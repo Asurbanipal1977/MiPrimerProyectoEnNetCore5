@@ -1,0 +1,118 @@
+﻿@using System.Collections.Generic;
+@using MiPrimerProyectoEnNetCore5.Clases;;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MiPrimerProyectoEnNetCore5</title>
+    <link href="~/lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="~/css/paginate.css" />
+    <link href="~/css/jquery-ui.css" rel="stylesheet" />
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <!-- JavaScript Bundle with Popper -->
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/sweet.js" asp-append-version="true"></script>
+    <script src="~/js/generic.js" asp-append-version="true"></script>
+    <script src="~/js/paginate.js" asp-append-version="true"></script>
+    <script src="~/js/jquery-ui.js"></script>
+    <script src="~/js/moment.js"></script>
+    <script>
+        $.extend($.fn.dataTable.defaults, {
+            searching: false,
+            ordering: false
+        });
+    </script>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3">
+            <div class="container">
+                <!--<a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">MiPrimerProyectoEnNetCore5</a>-->
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-area="" asp-controller="PaginaPrincipal" asp-action="Index">Principal</a>
+                        </li>
+
+                        @if (Generic.ListaPaginas != null)
+                        {
+
+                            foreach (PaginaCLS paginaCLS in Generic.ListaPaginas)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-area="" asp-controller="@paginaCLS.Controlador" asp-action="@paginaCLS.Accion">@paginaCLS.Mensaje</a>
+                                </li>
+                            }
+                        }
+
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-area="" asp-controller="Login" asp-action="Cerrar">Cerrar Sesión</a>
+                        </li>
+
+
+                        @*<li class="nav-item">
+            <a class="nav-link text-white" asp-area="" asp-controller="Especialidad" asp-action="Index">Especialidad</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white" asp-area="" asp-controller="Persona" asp-action="Index">Persona</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white" asp-area="" asp-controller="Sede" asp-action="Index">Sede</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white" asp-area="" asp-controller="Pagina" asp-action="Index">Página</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white" asp-area="" asp-controller="Medicamento" asp-action="Index">Medicamento</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white" asp-area="" asp-controller="TipoUsuario" asp-action="Index">TipoUsuario</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white" asp-area="" asp-controller="Doctor" asp-action="Index">Doctor</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white" asp-area="" asp-controller="Paciente" asp-action="Index">Paciente</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white" asp-area="" asp-controller="Usuario" asp-action="Index">Usuario</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white" asp-area="" asp-controller="PaginaTipoUsuario" asp-action="Index">Pagina Tipo Usuario</a>
+        </li>*@
+                        @*<li class="nav-item">
+            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Privacy">Privacidad</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="MiPagina">Mi Pagina</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white" asp-area="" asp-controller="Pais" asp-action="Inicio">Mi primera página en un nuevo controller</a>
+        </li>*@
+                    </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        <div class="container">
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
+        </div>
+
+        <footer class="border-top footer text-muted">
+            <div class="container">
+                &copy; 2021 - MiPrimerProyectoEnNetCore5 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            </div>
+        </footer>
+        @await RenderSectionAsync("Scripts", required: false)
+    </body>
+</html>

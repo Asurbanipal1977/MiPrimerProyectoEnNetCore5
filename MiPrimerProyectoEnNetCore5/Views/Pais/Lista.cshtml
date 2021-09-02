@@ -1,0 +1,45 @@
+﻿@using MiPrimerProyectoEnNetCore5.Clases;
+@{
+    ViewData["Title"] = "Lista";
+
+    List<Instructor> lInstructor = new List<Instructor>();
+
+    lInstructor.Add(
+    new Instructor()
+    {
+        Nombre = "Iván",
+        ApellidoPaterno = "Martínez",
+        ApellidoMaterno = "Santos"
+    });
+
+
+    lInstructor.Add(
+    new Instructor()
+    {
+        Nombre = "Miguel Ángel",
+        ApellidoPaterno = "Martínez",
+        ApellidoMaterno = "Eusebio"
+    });
+}
+
+<h1>Pagina por defecto</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Apellido 1</th>
+            <th>Apellido 2</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Instructor instructor in lInstructor)
+        {
+        <tr>
+            <td>@instructor.Nombre</td>
+            <td>@instructor.ApellidoPaterno</td>
+            <td>@instructor.ApellidoMaterno</td>
+        </tr>
+        }
+    </tbody>
+</table>

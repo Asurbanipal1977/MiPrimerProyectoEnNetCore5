@@ -1,0 +1,138 @@
+﻿
+@using MiPrimerProyectoEnNetCore5.Clases;
+@model IEnumerable<EspecialidadCLS>
+@{
+    ViewData["Title"] = "Index";
+
+    List<int> listaBotones = ViewBag.ListaBotones;
+}
+
+
+@if (listaBotones != null)
+{
+    if (listaBotones.Contains(1))
+    {
+        <a class="btn btn-secondary" asp-action="Agregar" asp-controller="Especialidad">Agregar</a>
+    }
+
+    if (listaBotones.Contains(4))
+    {
+        <input type="button" class="btn btn-primary" value="Exportar Excel" onclick="Exportar('Excel')" />
+    }
+
+
+    if (listaBotones.Contains(5))
+    {
+        <input type="button" class="btn btn-primary" value="Exportar Word" onclick="Exportar('Word')" />
+    }
+
+    if (listaBotones.Contains(6))
+    {
+        <input type="button" class="btn btn-primary" value="Exportar Pdf" onclick="Exportar('Pdf','Especialidad')" />
+    }
+
+    if (listaBotones.Contains(7))
+    {
+        <input type="button" class="btn btn-primary" value="Imprimir" onclick="Imprimir()" />
+    }
+
+}
+
+
+
+@*asp-controller="Especialidad" asp-action="Index" method="post"*@
+<form class="mb-2" style="display:grid;grid-template-columns:1fr 2fr 1fr 1fr" id="formEspecialidad">
+    <label>Introduzca nombre especialidad:</label>
+    <input type="text" id="NombreEspecialidad" class="form form-control" name="Nombre" value="@ViewBag.nombreEspecialidad" />
+    <input type="button" class="btn btn-info" value="Buscar" onclick="Buscar('Especialidad')" />
+    <input type="button" class="btn btn-danger" value="Limpiar" onclick="Limpiar()" />
+</form>
+
+<form asp-action="exportar" asp-controller="Especialidad" method="post" id="formExcel">
+    <table class="table" id="myTable">
+        <thead class="thead-dark">
+            <tr id="tcheck">
+                <th width="15%">
+                    <input type="checkbox" name="nombrePropiedades" checked value="idEspecialidad" />
+                    <input type="hidden" name="tipoReporte" id="tipoReporte" />
+                </th>
+                <th width="30%"><input type="checkbox" name="nombrePropiedades" checked value="nombre" /></th>
+                <th width="40%"><input type="checkbox" name="nombrePropiedades" checked value="descripcion" /></th>
+                <th width="15%"></th>
+            </tr>
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.idEspecialidad)</th>
+                <th>@Html.DisplayNameFor(model => model.nombre)</th>
+                <th>@Html.DisplayNameFor(model => model.descripcion)</th>
+                <th>Operaciones</th>
+            </tr>
+        </thead>
+        <tbody id="cuerpoTabla">
+            @*@foreach (EspecialidadCLS especialidad in Model)
+                {
+                    <tr>
+                        <td>@especialidad.idEspecialidad</td>
+                        <td>@especialidad.nombre</td>
+                        <td>@especialidad.descripcion</td>
+                        <td>
+                            <i class="fas fa-trash btn btn-danger" onclick="Eliminar(@especialidad.idEspecialidad)" style="cursor:pointer"></i>
+                            <a asp-controller="Especialidad" asp-action="Editar" asp-route-id="@especialidad.idEspecialidad" class="fas fa-edit btn btn-primary" style="cursor:pointer"></a>
+                        </td>
+                    </tr>
+                }*@
+        </tbody>
+    </table>
+</form>
+
+<form asp-action="Eliminar" asp-controller="Especialidad" method="post" id="formEliminarEspecialidad">
+    <input type="hidden" id="txtIdEspecialidad" name="idEspecialidad" />
+</form>
+
+<script>
+    var campos = ['idEspecialidad', 'nombre', 'descripcion'];
+    var campoID = 'idEspecialidad';
+
+    function Limpiar() {
+        $('#NombreEspecialidad').val("");
+        Listar('Especialidad');
+    }
+
+    function Eliminar(controller, idEspecialidad) {
+        AbrirModalGenerica().then((result) => {
+            if (result.isConfirmed) {
+                //$("#formEliminarEspecialidad").submit();
+                $.get(controller + '/Eliminar?idEspecialidad=' + idEspecialidad, function (respuesta) {
+                    if (respuesta == 1) {
+                        Correcto("Se eliminó correctamente la especialidad");
+                        Listar(controller);
+                    }
+                    else {
+                        Incorrecto("Ocurrió un error al eliminar");
+                    }
+                });
+            }
+        });
+    }
+
+    function Buscar(controller) {
+
+        if ($('#NombreEspecialidad').val() == "")
+            Listar(controller);
+        else {
+            var table = $('#myTable').DataTable();
+            table.destroy();
+            $.post(controller + '/Filtrar',
+                {
+                    nombre: $('#NombreEspecialidad').val()
+                }, function (data) {
+                    Pintar(data, controller, 'myTable', campos, campoID);
+                });
+        }
+    }
+
+    $(document).ready(function () {
+        editarboton = @listaBotones.IndexOf(2) > 0?true:false;
+        borrarboton = @listaBotones.IndexOf(3) > 0 ? true : false;
+        Listar('Especialidad');
+    });
+</script>

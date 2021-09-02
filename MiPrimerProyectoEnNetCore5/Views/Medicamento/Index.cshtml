@@ -1,0 +1,137 @@
+﻿@model IEnumerable<MiPrimerProyectoEnNetCore5.Clases.MedicamentoCLS>
+
+@{
+    ViewData["Title"] = "Index";
+    List<SelectListItem> listaForma = ViewBag.listFormaFarmaceutica;
+    List<int> listaBotones = ViewBag.ListaBotones;
+
+}
+
+<form method="post" class="mb-2" style="display:grid;grid-template-columns:1fr 2fr" id="formMedicamento">
+    <label>Introduzca forma farmaceutica:</label>
+    @Html.DropDownList("IdFormaFarmaceutica", listaForma, new { @class = "form form-control" })
+</form>
+
+@if (listaBotones != null)
+{
+    if (listaBotones.Contains(1))
+    {
+        <a class="btn btn-secondary" asp-action="Agregar" asp-controller="Especialidad">Agregar</a>
+    }
+
+    if (listaBotones.Contains(4))
+    {
+        <input type="button" class="btn btn-primary" value="Exportar Excel" onclick="Exportar('Excel')" />
+    }
+
+
+    if (listaBotones.Contains(5))
+    {
+        <input type="button" class="btn btn-primary" value="Exportar Word" onclick="Exportar('Word')" />
+    }
+
+    if (listaBotones.Contains(6))
+    {
+        <input type="button" class="btn btn-primary" value="Exportar Pdf" onclick="Exportar('Pdf','Especialidad')" />
+    }
+
+    if (listaBotones.Contains(7))
+    {
+        <input type="button" class="btn btn-primary" value="Imprimir" onclick="Imprimir()" />
+    }
+
+}
+
+
+<form asp-action="exportar" asp-controller="Medicamento" method="post" id="formExcel">
+    <table class="table" id="myTable">
+        <thead>
+            <tr id="tcheck">
+                <th>
+                    <input type="checkbox" name="nombrePropiedades" checked value="IdMedicamento" />
+                    <input type="hidden" name="tipoReporte" id="tipoReporte" />
+                </th>
+                <th><input type="checkbox" name="nombrePropiedades" checked value="Nombre" /></th>
+                <th><input type="checkbox" name="nombrePropiedades" checked value="Precio" /></th>
+                <th><input type="checkbox" name="nombrePropiedades" checked value="Stock" /></th>
+                <th><input type="checkbox" name="nombrePropiedades" checked value="NombreForma" /></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.IdMedicamento)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Nombre)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Precio)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Stock)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.NombreForma)
+                </th>
+                <th>
+                    Operaciones
+                </th>
+            </tr>
+        </thead>
+        <tbody id="cuerpoTabla">
+        </tbody>
+    </table>
+</form>
+
+<form method="post" id="formEliminar">
+    <input type="hidden" id="txtIdMedicamento" name="idMedicamento" />
+</form>
+
+<script>
+    var campos = ['idMedicamento', 'nombre', 'precio', 'stock', 'nombreForma'];
+    var campoID = 'idMedicamento';
+
+    $("#IdFormaFarmaceutica").change(function () {
+        Buscar('Medicamento');
+    });
+
+
+    function Buscar(controller) {
+
+        if ($('#IdFormaFarmaceutica').val() == "")
+            Listar(controller);
+        else {
+            var table = $('#myTable').DataTable();
+            table.destroy();
+            $.post(controller + '/Listar',
+                {
+                    IdFormaFarmaceutica: $('#IdFormaFarmaceutica').val()
+                }, function (data) {
+                    Pintar(data, controller, 'myTable', campos, campoID);
+                });
+        }
+    }
+
+    function Eliminar(controller, idMedicamento) {
+        $('#txtIdMedicamento').val(idMedicamento);
+        AbrirModalGenerica().then((result) => {
+            if (result.isConfirmed) {
+                $.get(controller + '/Eliminar?idMedicamento=' + idMedicamento, function (respuesta) {
+                    if (respuesta == 1) {
+                        Listar(controller);
+                        Correcto("Se eliminó el medicamento correctamente");
+                    }
+                    else {
+                        Incorrecto("No se pudo eliminar el medicamento");
+                    }
+                });
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        editarboton = @listaBotones.IndexOf(2) > 0?true:false;
+        borrarboton = @listaBotones.IndexOf(3) > 0 ? true : false;
+        Listar('Medicamento');
+    });
+</script>

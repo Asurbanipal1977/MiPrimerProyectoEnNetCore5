@@ -1,0 +1,272 @@
+﻿
+@using MiPrimerProyectoEnNetCore5.Clases;
+@model IEnumerable<UsuarioCLS>
+@{
+    ViewData["Title"] = "Index";
+    List<SelectListItem> listaTipoUsuario = ViewBag.listaTipoUsuario;
+
+    List<int> listaBotones = ViewBag.ListaBotones;
+}
+
+<button class="btn btn-secondary" data-toggle="modal" data-target="#exampleModal" onclick="Agregar()">Agregar</button>
+<input type="button" class="btn btn-primary" value="Exportar Excel" onclick="Exportar('Excel')" />
+<input type="button" class="btn btn-primary" value="Exportar Word" onclick="Exportar('Word')" />
+<input type="button" class="btn btn-primary" value="Exportar Pdf" onclick="Exportar('Pdf','Usuario')" />
+<input type="button" class="btn btn-primary" value="Imprimir" onclick="Imprimir()" />
+
+@*asp-controller="Especialidad" asp-action="Index" method="post"*@
+<form class="mb-2" style="display:grid;grid-template-columns:1fr 2fr 1fr 1fr" id="formUsuario">
+    <label>Introduzca nombre usuario :</label>
+    <input type="text" id="NombreUsuario" class="form form-control" name="Nombre" />
+    <input type="button" class="btn btn-info" value="Buscar" onclick="Buscar('Usuario')" />
+    <input type="button" class="btn btn-danger" value="Limpiar" onclick="Limpiar()" />
+</form>
+
+<form asp-action="exportar" asp-controller="Usuario" method="post" id="formExcel">
+    <table class="table" id="myTable">
+        <thead class="thead-dark">
+            <tr id="tcheck">
+                <th width="15%">
+                    <input type="checkbox" name="nombrePropiedades" checked value="nombreCompleto" />
+                    <input type="hidden" name="tipoReporte" id="tipoReporte" />
+                </th>
+                <th width="30%"><input type="checkbox" name="nombrePropiedades" checked value="nombreTipoUsuario" /></th>
+                <th width="40%"><input type="checkbox" name="nombrePropiedades" checked value="nombreUsuario" /></th>
+                <th width="15%"></th>
+            </tr>
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.nombreCompleto)</th>
+                <th>@Html.DisplayNameFor(model => model.nombreTipoUsuario)</th>
+                <th>@Html.DisplayNameFor(model => model.nombreUsuario)</th>
+                <th>Operaciones</th>
+            </tr>
+        </thead>
+        <tbody id="cuerpoTabla">
+        </tbody>
+    </table>
+</form>
+
+<form asp-action="Eliminar" asp-controller="Usuario" method="post" id="formEliminarEspecialidad">
+    <input type="hidden" id="txtIdEspecialidad" name="idEspecialidad" />
+</form>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="lblModalTitle">Alta de persona</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Id Usuario</label>
+                    <input type="text" id="txtIdUsuarioModal" class="form-control enviar" name="idUsuario" readonly />
+                </div>
+                <div class="form-group"  id="divPersonaAltaMod">
+                    <label>Persona</label>
+                    <div class="input-group">
+                        <input type="hidden" class="form-control enviar" id="txtIdPersonaPopUp" name="idPersona" readonly />
+                        <input type="text" class="form-control" id="txtNombrePersonaPopUp" readonly />
+                        <div class="input-group-append">
+                            <button class="btn btn-danger" data-toggle="modal" data-target="#modalUsuario" id="btnAbrirSubPopUp">Buscar</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Tipo Usuario</label>
+                    @Html.DropDownList("idTipoUsuario", listaTipoUsuario, new { @class = "form form-control enviar" })
+                </div>
+                <div class="form-group">
+                    <label>Nombre Usuario</label>
+                    <input type="text" id="txtNombreUsuario" class="form-control enviar" name="nombreUsuario"/>
+                </div>
+                <div class="form-group" id="divContra1">
+                    <label>Contraseña</label>
+                    <input type="password" id="txtContra1" class="form-control enviar" name="contra" />
+                </div>
+                <div class="form-group" id="divContra2">
+                    <label>Repetir Contraseña</label>
+                    <input type="password" id="txtContra2" class="form-control enviar" name="contra2" />
+                </div>  
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="Guardar('Usuario')">Guardar</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" id="btnCancelar">Cancelar</button>
+            </div>
+            <div id="divError">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalUsuario" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="divModalUsuario">
+                <label>Ingrese nombre completo:</label>
+                <input type="text" id="txtNombreCompletoModal" class="form-control" onkeyup="ListarPersona()" />
+                <table class="table" id="tbModalUsuario">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Id</th>
+                            <th>Nombre Completo</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbDatosPopup">
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal" id="btnCerrarModal">Cerrar</button>
+            </div>
+            <div id="divError">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var campos = ['nombreCompleto', 'nombreTipoUsuario', 'nombreUsuario'];
+    var campoID = 'idUsuario';
+
+    function Limpiar() {
+        $('#NombreEspecialidad').val("");
+        Listar('Usuario', true);
+    }
+
+    function Eliminar(controller, id) {
+        AbrirModalGenerica().then((result) => {
+            if (result.isConfirmed) {
+                $.get(controller + '/Eliminar?id=' + id, function (respuesta) {
+                    if (respuesta == 1) {
+                        Correcto("Se eliminó correctamente el usaurio");
+                        Listar(controller, true);
+                    }
+                    else {
+                        Incorrecto("Ocurrió un error al eliminar");
+                    }
+                });
+            }
+        });
+    }
+
+    function Buscar(controller) {
+
+        if ($('#NombreUsuario').val() == "")
+            Listar(controller, true);
+        else {
+            var table = $('#myTable').DataTable();
+            table.destroy();
+            $.post(controller + '/Listar',
+                {
+                    nombreUsuario: $('#NombreUsuario').val()
+                }, function (data) {
+                    Pintar(data, controller, 'myTable', campos, campoID, true);
+                });
+        }
+    }
+
+    function Agregar() {
+        $('#divError').html("");
+        $('#lblModalTitle').html('Alta de Usuario');
+        $('#divPersonaAltaMod').attr("style", "display:block");
+        $('#divContra1').attr("style", "display:block");
+        $('#divContra2').attr("style", "display:block");
+        $(".form-control").each(function () {
+            $(this).val("");
+        });
+    }
+
+    function Editar(controller, id) {
+        $('#lblModalTitle').html('Editar Usuario');
+        $('#divError').html("");
+        $('#divPersonaAltaMod').attr("style", "display:none");
+        $('#divContra1').attr("style", "display:none");
+        $('#divContra2').attr("style", "display:none");
+        $.get(controller + '/Editar/' + id,
+            function (data) {
+                $('#txtIdUsuarioModal').val(data.idUsuario);
+                $('#txtIdPersonaPopUp').val(data.idPersona);
+                $('#txtNombrePersonaPopUp').val(data.nombreCompleto);
+                $('#idTipoUsuario').val(data.idTipoUsuario);
+                $('#txtNombreUsuario').val(data.nombreUsuario);
+                $('#txtContra1').val(1);
+                $('#txtContra2').val(1);
+            });
+    }
+
+
+    function ListarPersona() {
+        var table = $('#tbModalUsuario').DataTable();
+        table.destroy();
+        $.post('Persona/ListarPersonaUsuario',
+            {
+                Nombre: $("#txtNombreCompletoModal").val()
+            },
+            function (data) {
+                Pintar(data, 'Persona', 'tbModalUsuario', ["idPersona", "nombreCompleto"], ["idPersona"], false, false, 'tbDatosPopup', 'nombreCompleto');
+            });
+    }
+
+    function Guardar(controller) {
+
+        if ($("#txtContra1").val().toUpperCase().trim() !=
+            $("#txtContra2").val().toUpperCase().trim()) {
+            Error("Las claves deben ser iguales");
+            return;
+        }
+
+        if ($('#txtIdUsuarioModal').val() == "") $('#txtIdUsuarioModal').val(0);
+
+        var frm = new FormData();
+        $(".enviar").each(function () {
+            frm.append($(this).attr('name'), $(this).val());
+        });
+
+        $.ajax(
+            {
+                type: "POST",
+                url: controller + '/GuardarDatos',
+                data: frm,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    $('#divError').html("");
+                    if (data == "OK") {
+                        Correcto("Se guardó el usuario correctamente");
+                        setTimeout(function () {
+                            $('#btnCancelar').click();
+                            Listar(controller, true);
+                            ListarPersona();
+                        }, 2000);
+                    }
+                    else {
+                        Incorrecto("Se produjo un error");
+                        $('#divError').html(data);
+                    }
+                }
+            }
+        );
+    }
+
+    $(document).ready(function () {
+        editarboton = @listaBotones.IndexOf(2) > 0?true:false;
+        borrarboton = @listaBotones.IndexOf(3) > 0 ? true : false;
+        Listar('Usuario', true);
+
+        $('#btnAbrirSubPopUp').click(function () {
+            ListarPersona();
+        });
+
+    });
+</script>

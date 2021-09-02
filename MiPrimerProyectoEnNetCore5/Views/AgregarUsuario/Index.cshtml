@@ -1,0 +1,147 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = null;
+
+    List<SelectListItem> listaSexo = ViewBag.listSexo;
+}
+<link href="~/lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
+<link rel="stylesheet" href="~/css/paginate.css" />
+<link href="~/css/jquery-ui.css" rel="stylesheet" />
+
+<div class="container">
+    <h1>Registrar Usuario</h1>
+
+
+    <div class="form-group">
+        <label>Id Persona</label>
+        <input type="text" id="txtIdPersonaModal" class="form-control" readonly />
+    </div>
+    <div class="form-group">
+        <label>Nombre</label>
+        <input type="text" id="txtNombre" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Apellido paterno</label>
+        <input type="text" id="txtAppaterno" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Apellido materno</label>
+        <input type="text" id="txtApmaterno" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Fecha nacimiento</label>
+        <input type="text" id="txtFechaNacimiento" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Teléfono fijo</label>
+        <input type="text" id="txtTelefonoFijo" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Teléfono móvil</label>
+        <input type="text" id="txtTelefonoMovil" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="txtEmail" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Introduzca sexo:</label>
+        @Html.DropDownList("idSexoFormulario", listaSexo, new { @class = "form form-control" })
+    </div>
+    <div class="form-group">
+        <label>Seleccione imagen</label>
+        <img src="" width="150" height="150" id="imgFoto" />
+        <input type="file" id="fupFoto" class="form-control" onchange="SeleccionarImagen()" accept="image/*" />
+    </div>
+    <div class="form-group">
+        <label>Nombre Usuario</label>
+        <input type="text" id="txtNombreUsuario" class="form-control enviar" name="nombreUsuario" />
+    </div>
+    <div class="form-group" id="divContra1">
+        <label>Contraseña</label>
+        <input type="password" id="txtContra1" class="form-control enviar" name="contra" />
+    </div>
+    <div class="form-group" id="divContra2">
+        <label>Repetir Contraseña</label>
+        <input type="password" id="txtContra2" class="form-control enviar" name="contra2" />
+    </div>
+
+    <div>
+        <button class="btn btn-success" onclick="Guardar('AgregarUsuario')">Registrar</button>
+        <a asp-area="" asp-controller="Login" asp-action="Index" class="btn btn-danger">
+            Regresar
+        </a>
+    </div>
+
+    <div id="divError">
+    </div>
+</div>
+
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<!-- JavaScript Bundle with Popper -->
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+<script src="~/js/sweet.js" asp-append-version="true"></script>
+<script src="~/js/generic.js" asp-append-version="true"></script>
+<script src="~/js/paginate.js" asp-append-version="true"></script>
+<script src="~/js/jquery-ui.js"></script>
+<script src="~/js/moment.js"></script>
+<script>
+    function SeleccionarImagen() {
+        var file = document.getElementById('fupFoto').files[0];
+        if (file) {
+            var reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function (e) {
+
+                $('#imgFoto').attr('src', e.target.result);
+            };
+        }
+    }
+
+    function Guardar(controller) {
+        if ($("#txtContra1").val().toUpperCase().trim() !=
+            $("#txtContra2").val().toUpperCase().trim()) {
+            Error("Las claves deben ser iguales");
+            return;
+        }
+
+        $.post(controller + '/GuardarDatos',
+            {
+                IdPersona: $('#txtIdPersonaModal').val() == "" ? 0 : $('#txtIdPersonaModal').val(),
+                Nombre: $('#txtNombre').val(),
+                Appaterno: $('#txtAppaterno').val(),
+                Apmaterno: $('#txtApmaterno').val(),
+                Fechanacimiento: $('#txtFechaNacimiento').val(),
+                Telefonofijo: $('#txtTelefonoFijo').val(),
+                Telefonocelular: $('#txtTelefonoMovil').val(),
+                Email: $('#txtEmail').val(),
+                IdSexo: $('#idSexoFormulario').val(),
+                Foto: $('#imgFoto').attr('src'),
+                nombreUsuario: $('#txtNombreUsuario').val(),
+                contra: $('#txtContra1').val(),
+                contra2: $('#txtContra2').val()
+            },
+            function (data) {
+                $('#divError').html("");
+                if (data == "OK") {
+                    Correcto("Se guardó la persona correctamente");
+                    document.location.href = "Login";
+                }
+                else {
+                    Incorrecto("Se produjo un error");
+                    $('#divError').html(data);
+                }
+            });
+    }
+
+    $(document).ready(function () {
+        $("#txtFechaNacimiento").datepicker({
+            dateFormat: "dd/mm/yy",
+            changeYear: true
+        });
+    });
+
+</script>

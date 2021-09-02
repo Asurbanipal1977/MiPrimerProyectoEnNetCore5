@@ -1,0 +1,263 @@
+﻿
+@using MiPrimerProyectoEnNetCore5.Clases;
+@model IEnumerable<PacienteCLS>
+@{
+    ViewData["Title"] = "Index";
+    List<SelectListItem> listaTipoSangre = ViewBag.listaTipoSangre;
+
+    List<int> listaBotones = ViewBag.ListaBotones;
+}
+
+<button class="btn btn-secondary" data-toggle="modal" data-target="#exampleModal" onclick="Agregar()">Agregar</button>
+<input type="button" class="btn btn-primary" value="Exportar Excel" onclick="Exportar('Excel')" />
+<input type="button" class="btn btn-primary" value="Exportar Word" onclick="Exportar('Word')" />
+<input type="button" class="btn btn-primary" value="Exportar Pdf" onclick="Exportar('Pdf','Paciente')" />
+<input type="button" class="btn btn-primary" value="Imprimir" onclick="Imprimir()" />
+
+@*asp-controller="Especialidad" asp-action="Index" method="post"*@
+<form class="mb-2" style="display:grid;grid-template-columns:1fr 2fr 1fr 1fr" id="formEspecialidad">
+    <label>Introduzca nombre paciente:</label>
+    <input type="text" id="NombrePaciente" class="form form-control" name="Nombre" />
+    <input type="button" class="btn btn-info" value="Buscar" onclick="Buscar('Paciente')" />
+    <input type="button" class="btn btn-danger" value="Limpiar" onclick="Limpiar()" />
+</form>
+
+<form asp-action="exportar" asp-controller="Paciente" method="post" id="formExcel">
+    <table class="table" id="myTable">
+        <thead class="thead-dark">
+            <tr id="tcheck">
+                <th width="15%">
+                    <input type="checkbox" name="nombrePropiedades" checked value="nombreCompleto" />
+                    <input type="hidden" name="tipoReporte" id="tipoReporte" />
+                </th>
+                <th width="30%"><input type="checkbox" name="nombrePropiedades" checked value="tipoSangre" /></th>
+                <th width="40%"><input type="checkbox" name="nombrePropiedades" checked value="alergia" /></th>
+                <th width="15%"></th>
+            </tr>
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.nombreCompleto)</th>
+                <th>@Html.DisplayNameFor(model => model.tipoSangre)</th>
+                <th>@Html.DisplayNameFor(model => model.alergia)</th>
+                <th>Operaciones</th>
+            </tr>
+        </thead>
+        <tbody id="cuerpoTabla">
+        </tbody>
+    </table>
+</form>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="lblModalTitle">Alta de persona</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Id Paciente</label>
+                    <input type="text" id="txtIdPacienteModal" class="form-control enviar" name="idPaciente"  readonly />
+                </div>
+                <div class="form-group" id="divPersonaAltaMod">
+                    <label>Persona</label>
+                    <div class="input-group">
+                        <input type="hidden" class="form-control enviar" id="txtIdPersonaPopUp" name="idPersona" readonly />
+                        <input type="text" class="form-control" id="txtNombrePersonaPopUp" readonly />
+                        <div class="input-group-append">
+                            <button class="btn btn-danger" data-toggle="modal" data-target="#modalUsuario" id="btnAbrirSubPopUp">Buscar</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Tipo de Sangre</label>
+                    @Html.DropDownList("idTipoSangre", listaTipoSangre, new { @class = "form form-control enviar" })
+                </div>
+                <div class="form-group">
+                    <label>Alergias</label>
+                    <input type="text" id="txtAlergias" class="form-control enviar" name="alergia" />
+                </div>
+                <div class="form-group">
+                    <label>Enfermedades</label>
+                    <input type="text" id="txtEnfermedades" class="form-control enviar" name="enfermedadesCronicas" />
+                </div>
+                <div class="form-group">
+                    <label>Cuadro vacunas</label>
+                    <input type="text" id="txtCuadroVacunas" class="form-control enviar" name="cuadroVacunas" />
+                </div>
+                <div class="form-group">
+                    <label>Antecedentes quirúrgicos</label>
+                    <input type="text" id="txtAntecedentes" class="form-control enviar" name="antecedentesQuirurgicos" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="Guardar('Paciente')">Guardar</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" id="btnCancelar">Cancelar</button>
+            </div>
+            <div id="divError">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalUsuario" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="divModalUsuario">
+                <label>Ingrese nombre completo:</label>
+                <input type="text" id="txtNombreCompletoModal" class="form-control" onkeyup="ListarPersona()" />
+                <table class="table" id="tbModalUsuario">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Id</th>
+                            <th>Nombre Completo</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbDatosPopup">
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal" id="btnCerrarModal">Cerrar</button>
+            </div>
+            <div id="divError">
+            </div>
+        </div>
+    </div>
+</div>
+
+<form asp-action="Eliminar" asp-controller="Especialidad" method="post" id="formEliminarEspecialidad">
+    <input type="hidden" id="txtIdEspecialidad" name="idEspecialidad" />
+</form>
+
+<script>
+    var campos = ['nombreCompleto', 'tipoSangre', 'alergia'];
+    var campoID = 'idPaciente';
+    function Limpiar() {
+        $('#NombrePaciente').val("");
+        Listar('Paciente', true);
+    }
+
+    function Eliminar(controller, id) {
+        AbrirModalGenerica().then((result) => {
+            if (result.isConfirmed) {
+                $.get(controller + '/Eliminar?id=' + id, function (respuesta) {
+                    if (respuesta == 1) {
+                        Correcto("Se eliminó correctamente el paciente");
+                        Listar(controller);
+                    }
+                    else {
+                        Incorrecto("Ocurrió un error al eliminar");
+                    }
+                });
+            }
+        });
+    }
+
+    function Buscar(controller) {
+
+        if ($('#NombrePaciente').val() == "")
+            Listar(controller, true);
+        else {
+            var table = $('#myTable').DataTable();
+            table.destroy();
+            $.post(controller + '/Listar',
+                {
+                    nombreCompleto: $('#NombrePaciente').val()
+                }, function (data) {
+                    Pintar(data, controller, 'myTable', campos, campoID, true);
+                });
+        }
+    }
+
+    function Agregar() {
+        $('#divError').html("");
+        $('#divPersonaAltaMod').attr("style", "display:block");
+        $('#lblModalTitle').html('Alta de Paciente');
+        $(".form-control").each(function () {
+            $(this).val("");
+        });
+    }
+
+    function Editar(controller, id) {
+        $('#lblModalTitle').html('Editar Paciente');
+        $('#divError').html("");
+        $('#divPersonaAltaMod').attr("style", "display:none");
+        $.get(controller + '/Editar/' + id,
+            function (data) {
+                $('#txtIdPacienteModal').val(data.idPaciente);
+                $('#txtIdPersonaPopUp').val(data.idPersona);
+                $('#txtNombrePersonaPopUp').val(data.nombreCompleto);
+                $('#idTipoSangre').val(data.idTipoSangre);
+                $('#txtAlergias').val(data.alergia);
+                $('#txtEnfermedades').val(data.enfermedadesCronicas);
+                $('#txtCuadroVacunas').val(data.cuadroVacunas);
+                $('#txtAntecedentes').val(data.antecedentesQuirurgicos);
+            });
+    }
+
+    function ListarPersona() {
+        var table = $('#tbModalUsuario').DataTable();
+        table.destroy();
+        $.post('Persona/ListarPersonaPaciente',
+            {
+                Nombre: $("#txtNombreCompletoModal").val()
+            },
+            function (data) {
+                Pintar(data, 'Persona', 'tbModalUsuario', ["idPersona", "nombreCompleto"], ["idPersona"], false, false, 'tbDatosPopup', 'nombreCompleto');
+            });
+    }
+
+    function Guardar(controller) {
+
+        if ($('#txtIdPacienteModal').val() == "") $('#txtIdPacienteModal').val(0);
+
+        var frm = new FormData();
+        $(".enviar").each(function () {
+            frm.append($(this).attr('name'), $(this).val());
+        });
+
+        $.ajax(
+            {
+                type: "POST",
+                url: controller + '/GuardarDatos',
+                data: frm,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    $('#divError').html("");
+                    if (data == "OK") {
+                        Correcto("Se guardó el paciente correctamente");
+                        setTimeout(function () {
+                            $('#btnCancelar').click();
+                            Listar(controller, true);
+                            ListarPersona();
+                        }, 2000);
+                    }
+                    else {
+                        Incorrecto("Se produjo un error");
+                        $('#divError').html(data);
+                    }
+                }
+            }
+        );
+    }
+
+    $(document).ready(function () {
+        editarboton = @listaBotones.IndexOf(2) > 0?true:false;
+        borrarboton = @listaBotones.IndexOf(3) > 0 ? true : false;
+        Listar('Paciente', true);
+        $('#btnAbrirSubPopUp').click(function () {
+            ListarPersona();
+        });
+    });
+</script>

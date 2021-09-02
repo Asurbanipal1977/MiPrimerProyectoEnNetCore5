@@ -1,0 +1,253 @@
+﻿@using MiPrimerProyectoEnNetCore5.Clases;
+
+@model IEnumerable<PersonaCLS>
+@{
+    ViewData["Title"] = "Index";
+    List<SelectListItem> listaSexo = ViewBag.listSexo;
+}
+
+<button class="btn btn-secondary" data-toggle="modal" data-target="#exampleModal" onclick="Agregar()">Agregar</button>
+<input type="button" class="btn btn-primary" value="Exportar Excel" onclick="Exportar('Excel')" />
+<input type="button" class="btn btn-primary" value="Exportar Word" onclick="Exportar('Word')" />
+<input type="button" class="btn btn-primary" value="Exportar Pdf" onclick="Exportar('Pdf','Persona')" />
+<input type="button" class="btn btn-primary" value="Imprimir" onclick="Imprimir()" />
+
+<form class="mb-2" style="display:grid;grid-template-columns:1fr 2fr 1fr 1fr" id="formPersona">
+    <label>Introduzca sexo:</label>
+    @Html.DropDownList("idSexo", listaSexo, new { @class = "form form-control" })
+    <input type="button" class="btn btn-primary" value="Buscar" onclick="Buscar('Persona')" />
+    <input type="button" class="btn btn-primary" value="Limpiar" onclick="Limpiar()" />
+</form>
+
+<form asp-action="exportar" asp-controller="Persona" method="post" id="formExcel">
+    <table class="table" id="myTable">
+        <thead class="thead-dark">
+            <tr id="tcheck">
+                <th>
+                    <input type="checkbox" name="nombrePropiedades" checked value="IdPersona" />
+                    <input type="hidden" name="tipoReporte" id="tipoReporte" />
+                </th>
+                <th><input type="checkbox" name="nombrePropiedades" checked value="NombreCompleto" /></th>
+                <th><input type="checkbox" name="nombrePropiedades" checked value="Email" /></th>
+                <th><input type="checkbox" name="nombrePropiedades" checked value="Sexo" /></th>
+                <th><input type="checkbox" name="nombrePropiedades" checked value="FechanacimientoCadena" /></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th>@Html.DisplayNameFor(persona => persona.IdPersona)</th>
+                <th>@Html.DisplayNameFor(persona => persona.NombreCompleto)</th>
+                <th>@Html.DisplayNameFor(persona => persona.Email)</th>
+                <th>@Html.DisplayNameFor(persona => persona.Sexo)</th>
+                <th>@Html.DisplayNameFor(persona => persona.Fechanacimiento)</th>
+                <th>Operaciones</th>
+            </tr>
+        <tbody id="cuerpoTabla">
+            @*@foreach (PersonaCLS persona in Model)
+                {
+                <tr>
+                    <td>@persona.IdPersona</td>
+                    <td>@persona.NombreCompleto</td>
+                    <td>@persona.Email</td>
+                    <td>@persona.Sexo</td>
+                    <td>
+                        <i class="fas fa-trash btn btn-danger" onclick="Eliminar(@persona.IdPersona)" style="cursor:pointer"></i>
+                        @Html.ActionLink("", "Editar", "Persona", new { id = persona.IdPersona }, new { @class = "fas fa-edit btn btn-primary", @style = "cursor:pointer" })
+                    </td>
+                </tr>
+                }*@
+        </tbody>
+    </table>
+</form>
+
+<form asp-action="Eliminar" asp-controller="Persona" method="post" id="formEliminar">
+    <input type="hidden" id="txtIdPersona" name="idPersona" />
+</form>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="lblModalTitle">Alta de persona</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Id Persona</label>
+                    <input type="text" id="txtIdPersonaModal" class="form-control" readonly />
+                </div>
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" id="txtNombre" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Apellido paterno</label>
+                    <input type="text" id="txtAppaterno" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Apellido materno</label>
+                    <input type="text" id="txtApmaterno" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Fecha nacimiento</label>
+                    <input type="text" id="txtFechaNacimiento" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Teléfono fijo</label>
+                    <input type="text" id="txtTelefonoFijo" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Teléfono móvil</label>
+                    <input type="text" id="txtTelefonoMovil" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="txtEmail" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Introduzca sexo:</label>
+                    @Html.DropDownList("idSexoFormulario", listaSexo, new { @class = "form form-control" })
+                </div>
+                <div class="form-group">
+                    <label>Seleccione imagen</label>
+                    <img src="" width="150" height="150" id="imgFoto"/>
+                    <input type="file" id="fupFoto" class="form-control" onchange="SeleccionarImagen()" accept="image/*" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="Guardar('Persona')">Guardar</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" id="btnCancelar">Cancelar</button>
+            </div>
+            <div id="divError">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var campos = ['idPersona', 'nombreCompleto', 'email', 'sexo', 'fechanacimientoCadena'];
+    var campoID = 'idPersona';
+
+    //function Buscar() {
+    //    $('#formPersona').submit();
+    //}
+
+    function Buscar(controller) {
+
+        if ($('#idSexo').val() == "")
+            Listar(controller, true);
+        else {
+            var table = $('#myTable').DataTable();
+            table.destroy();
+            $.post(controller + '/Filtrar',
+                {
+                    IdSexo: $('#idSexo').val()
+                }, function (data) {
+                    Pintar(data, controller, 'myTable', campos, campoID, true);
+                });
+        }
+    }
+
+    function Limpiar() {
+        $('#idSexo').val("");
+        Listar('Persona',true);
+    }
+
+    function Eliminar(controller,idPersona) {
+        $('#txtIdPersona').val(idPersona);
+        AbrirModalGenerica().then((result) => {
+            if (result.isConfirmed) {
+                $("#formEliminar").submit();
+                Correcto("Se eliminó la persona correctamente");
+            }
+            else {
+                Incorrecto("Error al eliminar");
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        Listar('Persona', true);
+        $("#txtFechaNacimiento").datepicker({
+            dateFormat: "dd/mm/yy",
+            changeYear: true
+        });
+    });
+
+
+    function Agregar() {
+        $('#divError').html("");
+        $('#imgFoto').attr('src', '');
+        $('#fupFoto').val('');
+        $('#lblModalTitle').html('Alta de Persona');
+        $(".form-control").each(function () {
+            $(this).val("");
+        });
+    }
+
+
+    function Editar(controller, id) {
+        $('#lblModalTitle').html('Editar Persona');
+        $('#divError').html("");
+        $('#imgFoto').attr('src', '');
+        $('#fupFoto').val('');
+        $.get(controller + '/Editar/' + id,
+            function (data) {
+                $('#txtIdPersonaModal').val(data.idPersona);
+                $('#txtNombre').val(data.nombre);
+                $('#txtAppaterno').val(data.appaterno);
+                $('#txtApmaterno').val(data.apmaterno);
+                $('#txtFechaNacimiento').val(data.fechanacimientoCadenaSet);
+                $('#txtTelefonoFijo').val(data.telefonofijo);
+                $('#txtTelefonoMovil').val(data.telefonocelular);
+                $('#txtEmail').val(data.email);
+                $('#idSexoFormulario').val(data.idSexo);
+                $('#imgFoto').attr('src', data.foto);
+            });
+    }
+
+    function Guardar(controller) {
+        $.post(controller + '/GuardarDatos',
+            {
+                IdPersona: $('#txtIdPersonaModal').val() == "" ? 0 : $('#txtIdPersonaModal').val(),
+                Nombre: $('#txtNombre').val(),
+                Appaterno: $('#txtAppaterno').val(),
+                Apmaterno: $('#txtApmaterno').val(),
+                Fechanacimiento: $('#txtFechaNacimiento').val(),
+                Telefonofijo: $('#txtTelefonoFijo').val(),
+                Telefonocelular: $('#txtTelefonoMovil').val(),
+                Email: $('#txtEmail').val(),
+                IdSexo: $('#idSexoFormulario').val(),
+                Foto: $('#imgFoto').attr('src')
+            },
+            function (data) {
+                $('#divError').html("");
+                if (data == "OK") {
+                    Correcto("Se guardó la persona correctamente");
+                    setTimeout(function () {
+                        $('#btnCancelar').click();
+                        Listar(controller, true);
+                    }, 2000);
+                }
+                else {
+                    Incorrecto("Se produjo un error");
+                    $('#divError').html(data);
+                }
+            });
+    }
+
+    function SeleccionarImagen() {
+        var file = document.getElementById('fupFoto').files[0];
+        if (file) {
+            var reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function (e) {
+                
+                $('#imgFoto').attr('src', e.target.result);
+            };
+        }
+    }
+</script>
+

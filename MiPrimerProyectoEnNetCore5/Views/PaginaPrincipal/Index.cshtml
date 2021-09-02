@@ -1,0 +1,18 @@
+﻿@using MiPrimerProyectoEnNetCore5.Clases;
+@model PersonaRegistrarCLS;
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Hola: @Model.Nombre</h1>
+
+<div class="container">
+    <img src="@Model.Foto" height="300" width="800" />
+
+    <p>Nombre: @Model.NombreCompleto</p>
+    <p>Teléfono fijo: @Model.Telefonofijo</p>
+    <p>Teléfono móvil: @Model.Telefonocelular</p>
+    <p>Fecha Nacimiento: @Model.FechanacimientoCadena</p>
+    <p>Nombre Usuario: @Model.nombreUsuario</p>
+    <p>Nombre Tipo Usuario: @Model.nombreTipoUsuario</p>
+</div>

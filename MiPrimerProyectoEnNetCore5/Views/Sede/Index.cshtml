@@ -1,0 +1,157 @@
+﻿@model IEnumerable<MiPrimerProyectoEnNetCore5.Clases.SedeCLS>
+
+@{
+    ViewData["Title"] = "Index";
+    List<int> listaBotones = ViewBag.ListaBotones;
+}
+
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Agregar</button>
+<input type="button" class="btn btn-primary" value="Exportar Excel" onclick="Exportar('Excel')" />
+<input type="button" class="btn btn-primary" value="Exportar Word" onclick="Exportar('Word')" />
+<input type="button" class="btn btn-primary" value="Exportar Pdf" onclick="Exportar('Pdf','Sede')" />
+<input type="button" class="btn btn-primary" value="Imprimir" onclick="Imprimir()" />
+
+<form asp-controller="Sede" asp-action="Index" method="post" class="mb-2 mt-2" style="display:grid;grid-template-columns:1fr 2fr 1fr 1fr" id="formSede">
+    <label>Introduzca nombre sede:</label>
+    <input type="text" id="NombreSede" class="form form-control" name="Nombre" value="@ViewBag.nombreSede" onkeyup="Buscar()" />
+    <input type="submit" class="btn btn-info" value="Buscar" />
+    <input type="button" class="btn btn-danger" value="Limpiar" onclick="Limpiar()" />
+</form>
+
+<form asp-action="exportar" asp-controller="Sede" method="post" id="formExcel">
+    <table class="table" id="myTable">
+        <thead class="thead-dark">
+            <tr id="tcheck">
+                <th>
+                    <input type="checkbox" name="nombrePropiedades" checked value="idSede" />
+                    <input type="hidden" name="tipoReporte" id="tipoReporte" />
+                </th>
+                <th><input type="checkbox" name="nombrePropiedades" checked value="Nombre" /></th>
+                <th><input type="checkbox" name="nombrePropiedades" checked value="Direccion" /></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.idSede)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Nombre)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Direccion)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.idSede)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Nombre)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Direccion)
+                    </td>
+                    <td>
+                        @if (listaBotones.IndexOf(3) > 0)
+                        {
+                            <i class="fas fa-trash btn btn-danger" onclick="Eliminar(@item.idSede)" style="cursor:pointer"></i>
+                        }
+
+                        @if (listaBotones.IndexOf(2) > 0)
+                        {
+                            @Html.ActionLink("", "Editar", "Sede", new { id = item.idSede }, new { @class = "fas fa-edit btn btn-primary", @style = "cursor:pointer" })
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</form>
+
+<form asp-action="Eliminar" asp-controller="Sede" method="post" id="formEliminarSede">
+    <input type="hidden" id="txtIdSede" name="idSede" />
+</form>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Id sede</label>
+                    <input type="text" id="txtIdSede" readonly value="0" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Nombre Sede</label>
+                    <input type="text" id="txtNombreSede" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Dirección</label>
+                    <input type="text" id="txtDireccionSede" class="form-control" />
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="Guardar('Sede')">Guardar</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" id="btnCancelar">Cancelar</button>
+            </div>
+            <div id="divError">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function Buscar() {
+        if (event.keyCode == 13)
+            $('#formSede').submit();
+    }
+    function Limpiar() {
+        $('#NombreSede').val("");
+        $('#formSede').submit();
+    }
+
+    function Eliminar(idSede) {
+        $('#txtIdSede').val(idSede);
+        AbrirModalGenerica().then((result) => {
+            if (result.isConfirmed) {
+                $("#formEliminarSede").submit();
+                Correcto('Se eliminó la sede correctamente');
+            }
+        });
+    }
+
+    function Guardar(controller) {
+        $.post(controller + '/GuardarDatos',
+            {
+                Nombre: $('#txtNombreSede').val(),
+                Direccion: $('#txtDireccionSede').val()
+            },
+            function (data) {
+                $('#divError').html();
+                if (data == "OK") {
+                    Correcto("Se guardó la sede correctamente");
+                    setTimeout(function () {
+                        $('#btnCancelar').click();
+                        $('#formSede').submit();
+                    }, 2000);
+                }
+                else {
+                    Incorrecto("Se produjo un error");
+                    $('#divError').html(data);
+                }
+            });
+    }
+</script>

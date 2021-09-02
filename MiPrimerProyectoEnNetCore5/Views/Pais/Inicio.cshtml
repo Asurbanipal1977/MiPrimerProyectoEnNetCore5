@@ -1,0 +1,17 @@
+﻿
+@{
+    ViewData["Title"] = "Inicio";
+
+    string mensaje = "Bienvenido al curso de .net";
+    string[] nombres = { "Juan", "Luis", "pedro" };
+}
+
+<h1>@mensaje</h1>
+
+<h1>Mi pagina con controller Pais</h1>
+
+@foreach (string nombre in nombres.Where(n => n.StartsWith("L")))
+{ 
+    <h2>El nombre de la persona es @nombre</h2>
+}
+
