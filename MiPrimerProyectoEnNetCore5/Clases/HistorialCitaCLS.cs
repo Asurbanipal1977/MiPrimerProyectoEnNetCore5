@@ -13,5 +13,7 @@ namespace MiPrimerProyectoEnNetCore5.Clases
 
 		public string fechaEstado { get; set; }
 		public string nombreUsuario { get; set; }
+
+		public string descripcionCita { get; set; }
 	}
 }

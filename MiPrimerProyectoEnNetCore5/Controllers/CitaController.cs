@@ -132,7 +132,8 @@ namespace MiPrimerProyectoEnNetCore5.Controllers
 								idCita = (int) c.Iidcita,
 								fechaEstado = (h.Dfecha == null ? "" : h.Dfecha.Value.ToShortDateString()),
 								nombreUsuario = p.Nombre + " " + p.Appaterno + " " + p.Apmaterno,
-								estadoCita = e.Vnombre
+								estadoCita = e.Vnombre,
+								descripcionCita = h.Vobservacion
 							}
 						).ToList();
 
@@ -172,6 +173,31 @@ namespace MiPrimerProyectoEnNetCore5.Controllers
 
 			return listCita;
 		}
+
+		public CitaCLS Editar(int id)
+		{
+			CitaCLS citaCLS = new CitaCLS();
+			using (BDHospitalContext bd = new BDHospitalContext())
+			{
+				citaCLS = (from cita in bd.Cita
+							 join persona in bd.Persona on cita.Iidpersona equals persona.Iidpersona
+							 join sede in bd.Sede on cita.Iidsede equals sede.Iidsede							 
+						   where cita.Bhabilitado == 1 && cita.Iidcita == id
+						   select new CitaCLS
+							 {
+								 idPersona = persona.Iidpersona,
+								 nombreCompleto = $"{persona.Nombre} {persona.Appaterno} {persona.Apmaterno}",
+							     idSede = sede.Iidsede,
+							     nombreSede = sede.Nombre,
+								 fechaEnfermedadCadena = cita.Dfechainicioenfermedad==null?"": cita.Dfechainicioenfermedad.Value.ToShortDateString(),
+								 descripcionEnfermedad = cita.Descripcionenfermedad
+							 }).First();
+			}
+
+			return citaCLS;
+		}
+
+
 		public int CambiarEstado(int idCita, int idEstadoACambiar, string motivo="")
 		{
 			int resultado = 0;
@@ -201,6 +227,64 @@ namespace MiPrimerProyectoEnNetCore5.Controllers
 					}
 					catch (Exception e)
 					{
+						dbContextTransaction.Rollback();
+					}
+				}
+			}
+
+			return resultado;
+		}
+
+		public string RevisarCita(RevisarCitaCLS revisarCitaCLS)
+		{
+			string resultado = "";
+			int idUsuario = int.Parse(HttpContext.Session.GetString("usuario"));
+
+			using (BDHospitalContext bDHospitalContext = new BDHospitalContext())
+			{
+				using (var dbContextTransaction = bDHospitalContext.Database.BeginTransaction())
+				{
+					try
+					{
+						if (!ModelState.IsValid)
+						{
+							var listElementos = (from model in ModelState.Values
+												 from errors in model.Errors
+												 select errors.ErrorMessage).ToList();
+
+							resultado = "<ul class='list-group'>";
+							foreach (var item in listElementos)
+							{
+								resultado += "<li class='list-group-item list-group-item-danger'>" + item + "</li>";
+							}
+
+							resultado += "</ul>";
+						}
+						else
+						{
+							Cita cita = bDHospitalContext.Cita
+									.Where(c => c.Iidcita == revisarCitaCLS.idCita).First();
+							cita.Dfechacita = revisarCitaCLS.fechaCita;
+							cita.Iiddoctorasignado = revisarCitaCLS.idDoctor;
+							cita.Precioatencion = revisarCitaCLS.precioCita;
+							cita.Iidestadocita = 7;
+
+							HistorialCita hc = new HistorialCita();
+							hc.Iidcita = revisarCitaCLS.idCita;
+							hc.Dfecha = DateTime.Now;
+							hc.Iidestado = 7;
+							hc.Iidusuario = idUsuario;
+
+							bDHospitalContext.HistorialCita.Add(hc);
+
+							bDHospitalContext.SaveChanges();
+							dbContextTransaction.Commit();
+							resultado = "OK";
+						}
+					}
+					catch (Exception e)
+					{
+						resultado = e.Message;
 						dbContextTransaction.Rollback();
 					}
 				}

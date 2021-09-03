@@ -41,5 +41,7 @@ namespace MiPrimerProyectoEnNetCore5.Clases
 		public string estadoCita { get; set; }
 		public int idEstadoCita { get; set; }
 		public string fechaEnfermedadCadena { get; set; }
+
+		public string nombreSede { get; set; }
 	}
 }

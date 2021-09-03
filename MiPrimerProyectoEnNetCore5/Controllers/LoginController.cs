@@ -46,7 +46,7 @@ namespace MiPrimerProyectoEnNetCore5.Controllers
 												Controlador = p.Controlador
 											}
 											))
-										.ToList();
+										.Distinct().OrderBy(p=>p.Controlador).ToList();
 
 					List<PaginaCLS> listaBotones = (from pgtb in bdContext.TipoUsuarioPaginaBoton
 											 join t in bdContext.TipoUsuarioPagina on pgtb.Iidtipousuariopagina equals t.Iidtipousuariopagina

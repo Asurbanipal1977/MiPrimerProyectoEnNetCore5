@@ -95,7 +95,7 @@ namespace MiPrimerProyectoEnNetCore5.Controllers
 							 join especialidad in bdContext.Especialidad on doctor.Iidespecialidad equals especialidad.Iidespecialidad
 							  where doctor.Bhabilitado == 1 &&
 							  (doctorCLS.nombreCompleto == null ? doctor.Iiddoctor == doctor.Iiddoctor:
-							   (persona.Nombre + " " + persona.Appaterno + " " + persona.Apmaterno).Contains(doctorCLS.nombreCompleto))
+							   (persona.Nombre + " " + persona.Appaterno + " " + persona.Apmaterno).Trim().ToUpper().Contains(doctorCLS.nombreCompleto.Trim().ToUpper()))
 							 select new DoctorCLS
 							 {
 								 idDoctor = doctor.Iiddoctor,

@@ -56,8 +56,14 @@ function Pintar(data, controller, table = "myTable", campos, campoID, popup = fa
             else if (data[idx]['idEstadoCita'] == '3') {
                 cadena += "<tr style='color:red;font-weight:bold'>";
             }
+            else if (data[idx]['idEstadoCita'] == '5') {
+                cadena += "<tr style='color:#00aae4;font-weight:bold'>";
+            }
             else if (data[idx]['idEstadoCita'] == '6') {
-                    cadena += "<tr style='color:tomato;font-weight:bold'>";
+                cadena += "<tr style='color:tomato;font-weight:bold'>";
+            }
+            else if (data[idx]['idEstadoCita'] == '7') {
+                    cadena += "<tr style='color:purple;font-weight:bold'>";
             }
             else {
                 cadena += "<tr>";
@@ -80,6 +86,12 @@ function Pintar(data, controller, table = "myTable", campos, campoID, popup = fa
                 cadena += `<td>`;
                 cadena += `      <i class="fas fa-eye btn btn-secondary" style="cursor:pointer" data-toggle="modal" 
                                 data-target="#modalHistorico" onclick="MostrarPopUpDinamico('Historial','Cita',${data[idx][campoID]})"></i>`;
+
+                //Editar Cita
+                if (data[idx]['idEstadoCita'] == '1' || data[idx]['idEstadoCita'] == '6') {
+                    cadena += `<i class="fas fa-edit btn btn-primary" style="cursor:pointer" data-toggle="modal"
+                                data-target="#modalHistorico" onclick="MostrarPopUpDinamico('Editar Cita','Cita',${data[idx][campoID]})"></i>`;
+                }
 
                 //Observar Cita
                 if (data[idx]['idEstadoCita'] == '2' && idVista == '1') {
@@ -105,17 +117,22 @@ function Pintar(data, controller, table = "myTable", campos, campoID, popup = fa
                     style="cursor:pointer" onclick="MostrarConfirmacion('Cita',${data[idx][campoID]})"></i>`;
                 }
 
+                //Justificar Cita
+                if (data[idx]['idEstadoCita'] == '6') {
+                    cadena += `<i class="fas fa-envelope-square btn btn-success" 
+                    style="cursor:pointer" onclick="MostrarConfirmacionJustificar('Cita',${data[idx][campoID]})"></i>`;
+                }
+
                 //Anular Cita
                 if (data[idx]['idEstadoCita'] == '2' && idVista == '1') {
                     cadena += `<i class="fas fa-times btn btn-danger" style="cursor:pointer" data-toggle="modal"
                                 data-target="#modalHistorico" onclick="MostrarPopUpDinamico('Anular Cita','Cita',${data[idx][campoID]})"></i>`;
                 }
+
+               
+
                 cadena += `</td>`;
             }
-            else {
-                cadena += `<td></td>`;
-            }
-
         }
         else {
 

@@ -17,6 +17,11 @@ namespace MiPrimerProyectoEnNetCore5.Controllers
 	[ServiceFilter(typeof(Seguridad))]
 	public class BaseController : Controller
 	{
+		public new RedirectToActionResult RedirectToAction(string action, string controller)
+		{
+			return base.RedirectToAction(action, controller);
+		}
+
 		public byte[] exportarWordDatos<T>(string[] nombrePropiedades, List<T> lista)
 		{
 			using (MemoryStream ms = new MemoryStream())

@@ -20,7 +20,10 @@ namespace MiPrimerProyectoEnNetCore5.Filters
 			var usuario = context.HttpContext.Session.GetString("usuario");
 			if (usuario == null)
 			{
-				context.Result = new RedirectResult("Login");
+				var controller = (ControllerBase) context.Controller;
+				context.Result = controller.RedirectToAction("Index", "Login");
+
+				//context.Result = new RedirectResult("Login");
 			}
 		}
 	}

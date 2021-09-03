@@ -66,7 +66,7 @@
 </div>
 
 <div class="modal fade" id="modalHistorico" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="lblTtilePopUpHistorico">Modal title</h5>
@@ -84,7 +84,7 @@
                                 <th>Fecha</th>
                                 <th>Estado</th>
                                 <th>Usuario</th>
-                                <th>Operaciones</th>
+                                <th>Descripción Cita</th>
                             </tr>
                         </thead>
                         <tbody id="cuerpoTablaHistorico">
@@ -100,14 +100,14 @@
                 <div id="divTablaModalObservar">
                     <div class="form-group">
                         <label>Motivo a Observar:</label>
-                        <textarea rows="8" cols="8" class="form form-control" id="txtMotivoObservar"></textarea>
+                        <textarea rows="8" cols="8" class="form form-control" id="txtMotivoObservar"></textarea>j
                     </div>
                 </div>
                 <div id="divTablaModalRevisar">
                     <div class="form-group">
                         <label>Doctor</label>
                         <div class="input-group">
-                            <input type="hidden" class="form-control enviar" id="txtIdPersonaRevisarPopUp" name="idPersona" readonly />
+                            <input type="hidden" class="form-control" id="txtIdPersonaRevisarPopUp" name="idPersona" readonly />
                             <input type="text" class="form-control" id="txtNombrePersonaRevisarPopUp" readonly />
                             <div class="input-group-append">
                                 <button class="btn btn-danger" data-toggle="modal" data-target="#modalUsuario" id="btnAbrirSubPopUpDoctor">Buscar</button>
@@ -123,12 +123,45 @@
                         <input class="form form-control" type="text" id="txtPrecioCita" />
                     </div>
                 </div>
+                <div id="divTablaModalEditar">
+                    <div class="form-group">
+                        <label>Persona</label>
+                        <div class="input-group">
+                            <input type="hidden" class="form-control" id="txtIdPersonaEditarPopUp" name="idPersona" readonly />
+                            <input type="text" class="form-control" id="txtNombrePersonaEditarPopUp" readonly />
+                            <div class="input-group-append">
+                                <button class="btn btn-danger" data-toggle="modal" data-target="#modalUsuario" id="btnAbrirSubPopUpEditarPersona">Buscar</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha enfermedad</label>
+                        <input type="text" id="txtFechaEnfermedadEditarPopUp" class="form-control enviar" name="fechaEnfermedad" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sede</label>
+                        <div class="input-group">
+                            <input type="hidden" class="form-control" id="txtIdSedeEditarPopUp" name="idSede" readonly />
+                            <input type="text" class="form-control" id="txtNombreSedeEditarPopUp" readonly />
+                            <div class="input-group-append">
+                                <button class="btn btn-danger" data-toggle="modal" data-target="#modalUsuario" id="btnAbrirSubPopUpEditarSede">Buscar</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción enfermedad</label>
+                        <textarea rows="8" cols="8" id="txtDescripcionEnfermedadEditarPopUp" class="form-control" name="descripcionEnfermedad">
+                        </textarea>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" onclick="GuardarDatosCita('Cita')" id="btnAceptarModalHistorico">Aceptar</button>
                 <button type="button" class="btn btn-danger" data-dismiss="modal" id="btnCerrarModalHistorico">Cerrar</button>
             </div>
-
+            <div id="divErrorPopUpCita">
+            </div>
         </div>
     </div>
 </div>
@@ -168,43 +201,42 @@
 <script>
     var campos = ['idCita', 'nombreCompleto', 'fechaEnfermedadCadena', 'nombreUsuario', 'estadoCita'];
     var campoID = 'idCita';
-    function ListarPersona() {
+    function ListarPersona(campoaRellenar) {
         $('#lblTtilePopUpMultiple').html('Buscar persona');
-        document.getElementById('txtNombreCompletoModal').onkeyup = function () { ListarPersona(); };
+        document.getElementById('txtNombreCompletoModal').onkeyup = function () { ListarPersona(campoaRellenar); };
 
         $.post('Persona/Listar',
             {
                 Nombre: $("#txtNombreCompletoModal").val()
             },
             function (data) {
-                PintarMultiplePopUp(data, 'Persona', 'divTablaModal', ["Id", "Nombre Completo"], ["idPersona", "nombreCompleto"], ["idPersona"], 'nombreCompleto');
+                PintarMultiplePopUp(data, 'Persona', 'divTablaModal', ["Id", "Nombre Completo"], ["idPersona", "nombreCompleto"], ["idPersona"], 'nombreCompleto', campoaRellenar);
             });
     }
 
-    function ListarDoctor() {
+    function ListarDoctor(campoaRellenar) {
         $('#lblTtilePopUpMultiple').html('Listar Doctor');
-        document.getElementById('txtNombreCompletoModal').onkeyup = function () { ListarDoctor(); };
+        document.getElementById('txtNombreCompletoModal').onkeyup = function () { ListarDoctor(campoaRellenar); };
 
-        $.post('Persona/Listar',
+        $.post('Doctor/Listar',
             {
-                Nombre: $("#txtNombreCompletoModal").val(),
-                bDoctor: 1
+                nombreCompleto: $("#txtNombreCompletoModal").val()
             },
             function (data) {
-                PintarMultiplePopUp(data, 'Persona', 'divTablaModal', ["Id", "Nombre Completo"],
-                    ["idPersona", "nombreCompleto"], ["idPersona"], 'nombreCompleto', 'PersonaRevisar');
+                PintarMultiplePopUp(data, 'Doctor', 'divTablaModal', ["Id", "Nombre Completo"],
+                    ["idDoctor", "nombreCompleto"], ["idDoctor"], 'nombreCompleto', campoaRellenar);
             });
     }
 
-    function ListarSede() {
+    function ListarSede(campoaRellenar) {
         $('#lblTtilePopUpMultiple').html('Buscar sede');
-        document.getElementById('txtNombreCompletoModal').onkeyup = function () { ListarSede(); };
+        document.getElementById('txtNombreCompletoModal').onkeyup = function () { ListarSede(campoaRellenar); };
         $.post('Sede/Listar',
             {
                 Nombre: $("#txtNombreCompletoModal").val()
             },
             function (data) {
-                PintarMultiplePopUp(data, 'Sede', 'divTablaModal', ["Id", "Nombre Completo"], ["idSede", "nombre"], ["idSede"], 'nombre');
+                PintarMultiplePopUp(data, 'Sede', 'divTablaModal', ["Id", "Nombre Completo"], ["idSede", "nombre"], ["idSede"], 'nombre', campoaRellenar);
             });
     }
 
@@ -245,7 +277,58 @@
                 });
         }
         else if (titulo == 'Revisar') {
+            var doctor = $('#txtIdPersonaRevisarPopUp').val();
+            var fecha = $('#txtFechaCita').val();
+            var precio = $('#txtPrecioCita').val();
+            $('#divErrorPopUpCita').html("");
 
+            $.post(controller + '/RevisarCita',
+                {
+                    idCita: idCita,
+                    idDoctor: doctor,
+                    fechaCita: fecha,
+                    precioCita: precio
+                }, function (data) {
+                    if (data == "OK") {
+                        Correcto("Se revisó la cita");
+                        LimpiarDatos();
+                        Listar(controller, true, true);
+                        $("#btnCerrarModalHistorico").click();
+                    }
+                    else {
+                        $("#divErrorPopUpCita").html(data);
+                        Incorrecto("Error al revisar la cita");
+                    }
+                        
+                });
+        }
+        else if (titulo == 'Editar Cita') {
+            var idPersona = $('#txtIdPersonaEditarPopUp').val();
+            var fecha = $('#txtFechaEnfermedadEditarPopUp').val();
+            var idSede = $('#txtIdSedeEditarPopUp').val();
+            var descripcion = $('#txtDescripcionEnfermedadEditarPopUp').val();
+            $('#divErrorPopUpCita').html("");
+
+            $.post(controller + '/GuardarDatos',
+                {
+                    idCita: idCita,
+                    idPersona: idPersona,
+                    idSede: idSede,
+                    fechaEnfermedad: fecha,
+                    descripcionEnfermedad: descripcion
+                }, function (data) {
+                    if (data == "OK") {
+                        Correcto("Se guardó la cita");
+                        LimpiarDatos();
+                        Listar(controller, true, true);
+                        $("#btnCerrarModalHistorico").click();
+                    }
+                    else {
+                        $("#divErrorPopUpCita").html(data);
+                        Incorrecto("Error al guardar la cita");
+                    }
+
+                });
         }
     }
 
@@ -267,7 +350,6 @@
                     $('#divError').html("");
                     if (data == "OK") {
                         Correcto("Se guardó la cita correctamente");
-                        $('#divError').html("");
                         LimpiarDatos();
                         Listar('Cita', true, true);
                     }
@@ -301,10 +383,13 @@
         $("#divTablaModalHistorico").css('display', 'none');
         $("#divTablaModalAnulacion").css('display', 'none');
         $("#divTablaModalObservar").css('display', 'none');
-        $("#divTablaModalRevisar").css('display', 'none');        
+        $("#divTablaModalRevisar").css('display', 'none'); 
+        $("#divTablaModalEditar").css('display', 'none'); 
 
         $("#btnAceptarModalHistorico").css('display', 'none');
         $('#txtIdCitaOculto').val(idCita);
+        $('#divErrorPopUpCita').html("");
+        LimpiarDatos();
 
         $("#lblTtilePopUpHistorico").html(opcion);
         if (opcion == "Historial") {
@@ -314,7 +399,7 @@
                     idCita: idCita
                 }, function (data) {
                     Pintar(data, controller, 'myTableHistorico',
-                        ['idHistorialCita', 'fechaEstado', 'estadoCita', 'nombreUsuario'],
+                        ['idHistorialCita','fechaEstado', 'estadoCita', 'nombreUsuario','descripcionCita'],
                         'idHistorialCita', false, false, "cuerpoTablaHistorico", "", true);
                 });
 
@@ -330,6 +415,24 @@
         else if (opcion == "Revisar") {
             $("#divTablaModalRevisar").css('display', 'block');
             $("#btnAceptarModalHistorico").css('display', 'block');
+        }
+        else if (opcion == "Editar Cita") {
+            $("#divTablaModalEditar").css('display', 'block');
+            $("#btnAceptarModalHistorico").css('display', 'block');
+
+            $.post(controller + '/Editar',
+                {
+                    id: idCita
+                }, function (data) {
+
+                    $('#txtIdPersonaEditarPopUp').val(data.idPersona);
+                    $('#txtNombrePersonaEditarPopUp').val(data.nombreCompleto);
+                    $('#txtFechaEnfermedadEditarPopUp').val(data.fechaEnfermedadCadena);
+                    $('#txtIdSedeEditarPopUp').val(data.idSede);
+                    $('#txtNombreSedeEditarPopUp').val(data.nombreSede);
+                    $('#txtDescripcionEnfermedadEditarPopUp').val(data.descripcionEnfermedad);                   
+                    $("#btnCerrarModalHistorico").click();                    
+                });
         }
     }
 
@@ -382,8 +485,39 @@
     }
 
 
+    function MostrarConfirmacionJustificar(controller, idCita)
+    {
+        AbrirModalGenerica().then((result) => {
+            if (result.isConfirmed) {
+                $.post(controller + '/CambiarEstado',
+                    {
+                        idCita: idCita,
+                        idEstadoACambiar: 5
+                    }, function (data) {
+                        if (data == 1) {
+                            Correcto("Se justificó la cita");
+                            Listar(controller, true, true);
+                        }
+                        else
+                            Incorrecto("Error al cambiar el estado");
+                    });
+
+            }
+            else {
+                Incorrecto("Error al cambiar ele estado");
+            }
+        });
+    }
+
+
     $(document).ready(function () {
         $("#txtFechaEnfermedad").datepicker({
+            dateFormat: "dd/mm/yy",
+            changeYear: true,
+            changeMonth: true
+        });
+
+        $("#txtFechaEnfermedadEditarPopUp").datepicker({
             dateFormat: "dd/mm/yy",
             changeYear: true,
             changeMonth: true
@@ -399,18 +533,28 @@
 
         $('#btnAbrirSubPopUp').click(function () {
             $("#txtNombreCompletoModal").val("");
-            ListarPersona();
+            ListarPersona('Persona');
         });
 
 
         $('#btnAbrirSubPopUpDoctor').click(function () {
             $("#txtNombreCompletoModal").val("");
-            ListarDoctor();
+            ListarDoctor('PersonaRevisar');
         });
+
+        $('#btnAbrirSubPopUpEditarPersona').click(function () {
+            $("#txtNombreCompletoModal").val("");
+            ListarPersona('PersonaEditar');
+        });        
 
         $('#btnAbrirSubPopUpSede').click(function () {
             $("#txtNombreCompletoModal").val("");
-            ListarSede();
+            ListarSede('Sede');
+        });
+
+        $('#btnAbrirSubPopUpEditarSede').click(function () {
+            $("#txtNombreCompletoModal").val("");
+            ListarSede('SedeEditar');
         });
     });
 </script>
